@@ -10,10 +10,53 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180316211701) do
+ActiveRecord::Schema.define(version: 20180316231549) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "editions", force: :cascade do |t|
+    t.integer "year"
+    t.bigint "event_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["event_id"], name: "index_editions_on_event_id"
+  end
+
+  create_table "events", force: :cascade do |t|
+    t.string "name"
+    t.string "location"
+    t.string "url"
+    t.string "organiser"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "races", force: :cascade do |t|
+    t.string "format"
+    t.integer "distance_swim"
+    t.integer "distance_bike"
+    t.integer "distance_run"
+    t.integer "vertical_ascent_bike"
+    t.integer "vertical_ascent_run"
+    t.integer "nb_participants"
+    t.date "date"
+    t.bigint "edition_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "sport"
+    t.index ["edition_id"], name: "index_races_on_edition_id"
+  end
+
+  create_table "registrations", force: :cascade do |t|
+    t.date "date"
+    t.bigint "user_id"
+    t.bigint "race_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["race_id"], name: "index_registrations_on_race_id"
+    t.index ["user_id"], name: "index_registrations_on_user_id"
+  end
 
   create_table "users", force: :cascade do |t|
     t.string "email", default: "", null: false
@@ -28,8 +71,13 @@ ActiveRecord::Schema.define(version: 20180316211701) do
     t.inet "last_sign_in_ip"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "admin"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  add_foreign_key "editions", "events"
+  add_foreign_key "races", "editions"
+  add_foreign_key "registrations", "races"
+  add_foreign_key "registrations", "users"
 end
